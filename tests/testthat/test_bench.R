@@ -2,8 +2,11 @@ library(BenchmarkingR)
 context("bench test")
 
 test_that("Create a simple benchmarkingR project from scratch", {
+  dir.name = tempdir()
+  dir.create(dir.name)
+  dirbench.name = file.path(dir.name,"BenchmarkingR_project")
 
-  bench.proj = bench( dir.name = "~/PatatorHomeDir/Projects/BenchmarkingR/", new=TRUE )
+  bench.proj = bench( dir.name = dir.name, new=TRUE )
 
   bench.proj = bench.addmethod(bench.proj,
                                method.func=function(x) { return(x) },
@@ -32,12 +35,17 @@ test_that("Create a simple benchmarkingR project from scratch", {
 
   bench.save(bench.proj)
 
+  unlink( bench.proj$dirbench, recursive = TRUE )
+
 })
 
 
 test_that("Create a simple benchmarkingR project from scratch", {
 
-  bench.proj = bench( dir.name = "~/PatatorHomeDir/Projects/BenchmarkingR/", new=TRUE )
+  dir.name = tempdir()
+  dir.create(dir.name)
+
+  bench.proj = bench( dir.name = dir.name, new=TRUE )
 
   data.name = "data1"
   method.name = "func1"
@@ -87,22 +95,25 @@ test_that("Create a simple benchmarkingR project from scratch", {
   # try to run over all data set dan function
   bench.proj = bench.run(bench.proj)
 
-  expect_warning(bench.run(bench.proj, data.name, method.name),"Done: use argument again=TRUE to run it again.")
+  expect_warning(bench.run(bench.proj, data.name, method.name))
 
   bench.proj = bench.run(bench.proj,again = TRUE)
 
+
+  unlink( bench.proj$dirbench, recursive = TRUE )
 
 })
 
 
 test_that("Test consistency between env and directory.", {
+  dir.name = tempdir()
+  dir.create(dir.name)
+  dirbench.name = file.path(dir.name,"BenchmarkingR_project")
+  # remove the directory
+  unlink( dirbench.name, recursive = TRUE )
+  dir.create(dirbench.name)
 
-  #   dirbench.name = "~/PatatorHomeDir/Projects/BenchmarkingR/"
-  #   # remove the directory
-  #   unlink( dirbench.name, recursive = TRUE )
-  #   dir.create(dirbench.name)
-  #
-  #   bench.proj = bench( dir.name = dirbench.name, new=TRUE )
+  expect_error( bench( dir.name = dir.name, new=TRUE ) )
 
-
+  unlink( dirbench.name, recursive = TRUE )
 })
