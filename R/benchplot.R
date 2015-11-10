@@ -40,8 +40,16 @@ bench.hist <- function(bench, data.name, method.name ) {
 }
 
 bench.dfr_power <- function(bench, data.name) {
-
   p = ggplot(filter(bench$fdr_power, data == data.name ), aes(x = fdr, y = power, group=method, color=method)) + geom_smooth() + geom_abline() + xlim(c(0,1)) + ylim(c(0,1.1))
   return(p)
 }
 
+#' Use qvalue package to compute expected fdr then plot threshold against power and fdr
+#'
+#' @export
+bench.power_fdr_threshold <- function(p.value, outlier) {
+  q.value = qvalue::qvalue(p.value)$qvalue
+  cat("TODO")
+
+
+}
