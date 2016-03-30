@@ -10,7 +10,7 @@ test_that("Remove method", {
 
   # create methode and dataset
   function.test = function(G,X,parameter) {
-    return(list(pvalue = 1:ncol(G),K = parameter$K))
+    return(list(pvalue = (1:ncol(G))/ncol(G),K = parameter$K))
   }
   bench.proj = bench.addmethod(bench.proj,
                                method.func=function.test,
@@ -42,7 +42,7 @@ test_that("Remove method", {
   # results
   expect_equal(nrow(bench.proj$results()),0)
   # pvalue
-  expect_equal(nrow(bench.proj$pvalue()),0)
+  expect_equal(nrow(bench.proj$pvalues()),0)
 
   unlink( bench.proj$dirbench, recursive = TRUE )
 
@@ -57,7 +57,7 @@ test_that("Remove dataset", {
 
   # create methode and dataset
   function.test = function(G,X,parameter) {
-    return(list(pvalue = 1:ncol(G),K = parameter$K))
+    return(list(pvalue = (1:ncol(G))/ncol(G),K = parameter$K))
   }
   bench.proj = bench.addmethod(bench.proj,
                                method.func=function.test,
@@ -91,7 +91,7 @@ test_that("Remove dataset", {
   # fdr_power
   # TODO
   # pvalue
-  expect_equal(as.character(bench.proj$pvalue()$data),c("data2","data2","data2"))
+  expect_equal(as.character(bench.proj$pvalues()$data),c("data2","data2","data2"))
 
   unlink( bench.proj$dirbench, recursive = TRUE )
 

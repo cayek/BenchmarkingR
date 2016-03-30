@@ -54,6 +54,31 @@ bench.getparam <- function( bench.proj, data.name, method.name) {
 }
 
 
+#' Getter a data.exploration
+#'
+#'
+#' TODO
+#'
+#' @return TODO
+#'
+#' @examples
+#' TODO
+#
+#' @export
+bench.getdata.exploration <- function( bench.proj, data.name) {
+  dname = data.name
+  data.row = dplyr::filter( bench.proj$dataset(), name == dname )
+
+  if(nrow(data.row) == 0) {
+
+    warning("No data set availables with this name",call. = FALSE)
+    return(list())
+  } else {
+    load( data.row$data_exploration )
+    return(data.exploration)
+  }
+}
+
 #' Getter a dataset
 #'
 #'
@@ -78,6 +103,7 @@ bench.getdata <- function( bench.proj, data.name) {
     return(data)
   }
 }
+
 
 #' Getter a method
 #'

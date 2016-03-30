@@ -5,7 +5,7 @@
 \title{Create a new benchmarkingR project dirrectory if the BenchmarkingR directory does not exist.
 If the directory exits retrieve the BenchmarkingR project}
 \usage{
-bench(dir.name = NULL, new = FALSE)
+bench(dir.name = NULL, new = FALSE, patatorDir = NULL)
 }
 \value{
 TODO

@@ -1,7 +1,7 @@
 library(BenchmarkingR)
 context("bench test")
 
-test_that("Create a simple benchmarkingR project from scratch", {
+test_that("Create a simple benchmarkingR project from scratch 0", {
   dir.name = tempdir()
   dir.create(dir.name)
 
@@ -39,7 +39,7 @@ test_that("Create a simple benchmarkingR project from scratch", {
 })
 
 
-test_that("Create a simple benchmarkingR project from scratch", {
+test_that("Create a simple benchmarkingR project from scratch 1", {
 
   dir.name = tempdir()
   dir.create(dir.name)
@@ -63,7 +63,7 @@ test_that("Create a simple benchmarkingR project from scratch", {
 
 
   bench.proj = bench.addmethod(bench.proj,
-                               method.func=function(G,X,parameter) { return(list(pvalue = 1:ncol(G))) },
+                               method.func=function(G,X,parameter) { return(list(pvalue = (1:ncol(G))/ncol(G))) },
                                method.name="func1",
                                method.description="")
 
@@ -75,7 +75,7 @@ test_that("Create a simple benchmarkingR project from scratch", {
   bench.proj = bench.remove(bench.proj, data.name, method.name)
 
   expect_equal(nrow(bench.proj$summary()),0)
-  expect_equal(nrow(bench.proj$pvalue()),0)
+  expect_equal(nrow(bench.proj$pvalues()),0)
 
   # add other method and data set
   bench.proj = bench.adddataset(bench.proj,
@@ -85,7 +85,7 @@ test_that("Create a simple benchmarkingR project from scratch", {
                                 data.name="data2",
                                 data.description="")
   bench.proj = bench.addmethod(bench.proj,
-                               method.func=function(G,X,parameter) { return(list(pvalue = 1:ncol(G))) },
+                               method.func=function(G,X,parameter) { return(list(pvalue = (1:ncol(G))/ncol(G))) },
                                method.name="func2",
                                method.description="")
 
@@ -124,7 +124,7 @@ test_that("run computation with parameter", {
   bench.proj = bench( dir.name = dir.name, new=TRUE )
 
   bench.proj = bench.addmethod(bench.proj,
-                               method.func=function(G,X) { return(list(pvalue = 1:ncol(G))) },
+                               method.func=function(G,X) { return(list(pvalue = (1:ncol(G))/ncol(G)  )) },
                                method.name="func1",
                                method.description="")
 
@@ -156,7 +156,7 @@ test_that("run computation with parameter", {
 
   # test result
   function.test = function(G,X,parameter) {
-    return(list(pvalue = 1:ncol(G),K = parameter$K))
+    return(list(pvalue = (1:ncol(G))/ncol(G) ,K = parameter$K))
   }
 
   bench.proj = bench.addmethod(bench.proj,
@@ -164,7 +164,7 @@ test_that("run computation with parameter", {
                                method.name="func2",
                                method.description="")
 
-  bench.proj = bench.run(bench.proj, data.name = "data1",again=TRUE, method.name = "func2", K = 1, B= 2)
+  bench.proj = bench.run(bench.proj, data.name = "data1",again=FALSE, method.name = "func2", parameter = list(K = 1, B= 2) )
 
   param = bench.getparam(bench.proj, data.name = "data1", method.name = "func2")
 
@@ -179,7 +179,7 @@ test_that("run computation with parameter", {
   expect_equal(result$K,1)
 
   # with K = 2
-  bench.proj = bench.run(bench.proj, data.name = "data1",again=TRUE, method.name = "func2", K = 2, B= 2)
+  bench.proj = bench.run(bench.proj, data.name = "data1",again=TRUE, method.name = "func2", parameter = list(K = 2, B= 2) )
   result = bench.getresult(bench.proj, data.name = "data1", method.name = "func2")
   expect_equal(result$K,2)
 
@@ -195,7 +195,7 @@ test_that("Test if on run with parameter", {
   bench.proj = bench( dir.name = dir.name, new=TRUE )
 
   function.test = function(G,X,parameter) {
-    return(list(pvalue = 1:ncol(G),K = parameter$K))
+    return(list(pvalue = (1:ncol(G))/ncol(G),K = parameter$K))
   }
 
   bench.proj = bench.addmethod(bench.proj,
@@ -216,7 +216,7 @@ test_that("Test if on run with parameter", {
   expect_null(result$K)
 
   # run with parameter K = 1
-  bench.proj = bench.run(bench.proj, data.name = "data1",again=TRUE, method.name = "func2", K=1)
+  bench.proj = bench.run(bench.proj, data.name = "data1",again=TRUE, method.name = "func2", parameter = list(K=1) )
   result = bench.getresult(bench.proj, data.name = "data1", method.name = "func2")
   expect_equal(result$K,1)
 
@@ -237,7 +237,7 @@ test_that("Test summary parameter", {
   bench.proj = bench( dir.name = dir.name, new=TRUE )
 
   function.test = function(G,X,parameter) {
-    return(list(pvalue = 1:ncol(G),K = parameter$K))
+    return(list(pvalue = (1:ncol(G))/ncol(G),K = parameter$K))
   }
 
   bench.proj = bench.addmethod(bench.proj,
@@ -257,7 +257,7 @@ test_that("Test summary parameter", {
   expect_equal(as.character(bench.proj$summary()$parameter),"Parameters :")
 
   # run with parameter
-  bench.proj = bench.run(bench.proj, data.name = "data1",again=TRUE, method.name = "func2",K=1,B=2)
+  bench.proj = bench.run(bench.proj, data.name = "data1",again=TRUE, method.name = "func2", parameter = list(K=1,B=2) )
   expect_equal(as.character(bench.proj$summary()$parameter),"Parameters : K = 1 | B = 2 |")
 
   unlink( bench.proj$dirbench, recursive = TRUE )
@@ -274,7 +274,7 @@ test_that("Test time of run", {
 
   function.test = function(G,X,parameter) {
     a=rnorm(10000000)
-    return(list(pvalue = 1:ncol(G),K = parameter$K))
+    return(list(pvalue = (1:ncol(G))/ncol(G),K = parameter$K))
   }
 
   bench.proj = bench.addmethod(bench.proj,
@@ -306,7 +306,7 @@ test_that("replace method or dataset", {
 
   # replace method
   function.test = function(G,X,parameter) {
-    return(list(pvalue = 1:ncol(G),K = parameter$K))
+    return(list(pvalue = (1:ncol(G))/ncol(G),K = parameter$K))
   }
   bench.proj = bench.addmethod(bench.proj,
                                method.func=function.test,
@@ -315,7 +315,7 @@ test_that("replace method or dataset", {
   method = bench.getmethod(bench.proj,"func2")
   expect_equal(method(diag(2),1,list(K=3))$K,3)
   function.test = function(G,X,parameter) {
-    return(list(pvalue = 1:ncol(G),K = 1))
+    return(list(pvalue = (1:ncol(G))/ncol(G),K = 1))
   }
   expect_warning(bench.addmethod(bench.proj,
                                  method.func=function.test,
@@ -351,5 +351,59 @@ test_that("replace method or dataset", {
 
 })
 
+test_that("Is every thing removed?", {
 
+  dir.name = tempdir()
+  dir.create(dir.name)
+
+  bench.proj = bench( dir.name = dir.name, new=TRUE )
+
+  # add data set
+  bench.proj = bench.adddataset(bench.proj,
+                                data.G=diag(2),
+                                data.X=c(1,2),
+                                data.outlier = c(2),
+                                data.name="data1",
+                                data.description="")
+
+  bench.proj = bench.adddataset(bench.proj,
+                                data.G=diag(2),
+                                data.X=c(1,2),
+                                data.outlier = c(2),
+                                data.name="data2",
+                                data.description="")
+
+  # add method
+  function.test = function(G,X,parameter) {
+    return(list(pvalue = (1:ncol(G))/ncol(G),K = parameter$K))
+  }
+
+  bench.proj = bench.addmethod(bench.proj,
+                               method.func=function.test,
+                               method.name="func2",
+                               method.description="")
+  bench.proj = bench.addmethod(bench.proj,
+                               method.func=function.test,
+                               method.name="func1",
+                               method.description="")
+
+  # run
+  bench.proj = bench.run(bench.proj, data.name = NULL,again=FALSE, method.name = NULL, parameter = list(K=1) )
+
+  # remove all
+  bench.removedataset(bench.proj, "data1")
+  bench.removedataset(bench.proj, "data2")
+  bench.removemethod(bench.proj, "func2")
+  bench.removemethod(bench.proj, "func1")
+
+  # test if dir is empty
+  files = list.files(bench.proj$dirbench)
+
+  expect_equal(length(files),2)
+  expect_true("bench.db" %in% files)
+  expect_true("bench.RData" %in% files)
+
+  unlink( bench.proj$dirbench, recursive = TRUE )
+
+})
 

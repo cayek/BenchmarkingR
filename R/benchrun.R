@@ -58,18 +58,33 @@ run <- function(bench.proj, data.name, method.name ) {
   t=proc.time() - ptm
   time = t[1] + t[2] + t[4] + t[5]
 
-  save.result(bench.proj, data.name, method.name,result)
-  pvalue = data.frame( pvalue = result$pvalue )
-  pvalue$ind = 1:ncol(data$G)
-  pvalue$outlier = pvalue$ind %in% data$outlier
-  pvalue$method = method.name
-  pvalue$data = data.name
+  # filter for nan value
+  nan.index = which(is.na(result$pvalue))
+  if( length(nan.index)>0) {
+    warning(paste("Method:",method.name,", on dataset:",data.name,",return NaN pvalue.\n"), call. = FALSE,
+            noBreaks. = TRUE, immediate. = TRUE)
+    result$pvalue[nan.index] = 0
+  }
 
-  add_to_table(bench.proj,pvalue,"pvalue")
 
-  # fdr and power
-  #fdr_power = cbind( power_fdr( pvalue$p.value, data$outlier ), method = method.name, data = data.name )
-  #bench.proj$fdr_power = rbind(bench.proj$fdr_power,fdr_power)
+  pvalues = data.frame( pvalue = result$pvalue )
+  m = ncol(data$G)
+  m_0 = length(data$outlier)
+  pvalues$ind = 1:m
+  pvalues$outlier = pvalues$ind %in% data$outlier
+  pvalues$method = method.name
+  pvalues$data = data.name
+  # sort pvalue
+  pvalues = dplyr::arrange(pvalues, method, pvalue )
+  # fdr and power computation
+  pvalues = dplyr::mutate(dplyr::group_by(pvalues,method), i = 1:m )
+  pvalues = dplyr::mutate(dplyr::group_by(pvalues,method), threshold = qvalue::qvalue(pvalue)$qvalues )
+  pvalues = dplyr::mutate(dplyr::group_by(pvalues,method), power = cumsum(outlier) / m_0 )
+  pvalues = dplyr::mutate(dplyr::group_by(pvalues,method), fdr = cumsum(!outlier) / i )
+
+
+  add_to_table(bench.proj,as.data.frame(pvalues),"pvalues")
+  save.result(bench.proj, data.name, method.name, result)
 
   # summary
   sum = data.frame( data = I(data.name),
@@ -95,9 +110,7 @@ run <- function(bench.proj, data.name, method.name ) {
 #' TODO
 #
 #' @export
-bench.run <- function( bench.proj, data.name=NULL, method.name=NULL, again = FALSE, ...) {
-
-  parameter = list(...)
+bench.run <- function( bench.proj, data.name=NULL, method.name=NULL, again = FALSE, parameter=list()) {
 
   if( length(data.name) == 0 ) {
 
@@ -149,8 +162,18 @@ bench.run <- function( bench.proj, data.name=NULL, method.name=NULL, again = FAL
     }
   }
 
-
-
-  bench.save(bench.proj)
   return(bench.proj)
 }
+
+
+run_on_patator <- function(patatorDir, data.name=NULL, method.name=NULL, again = FALSE, ...) {
+  function() {
+    library(BenchmarkingR)
+    bench.proj = bench( dir.name = patatorDir)
+    bench.proj$db = bench.proj$patatorDb
+    bench.proj$dirbench = bench.proj$patatorDir
+    bench.run( bench.proj, data.name, method.name, again, ...)
+  }
+}
+
+

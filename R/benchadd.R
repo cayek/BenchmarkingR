@@ -82,10 +82,14 @@ bench.adddataset <- function(bench.proj,data.G, data.X, data.outlier, data.name,
 
   file.path = tempfile(tmpdir = bench.proj$dirbench)
   save(data,file = file.path)
+  dataexploration.file.path = tempfile(tmpdir = bench.proj$dirbench)
+  data.exploration = list()
+  save(data.exploration, file = dataexploration.file.path)
 
   row = data.frame( name = I(data.name),
                     description = I(data.description),
-                    file_path = I(file.path))
+                    file_path = I(file.path),
+                    data_exploration = I(dataexploration.file.path))
 
   add_to_table(bench.proj, row,"dataset")
   return(bench.proj)

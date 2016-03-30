@@ -5,7 +5,7 @@
 \title{run bencmarking}
 \usage{
 bench.run(bench.proj, data.name = NULL, method.name = NULL, again = FALSE,
-  ...)
+  parameter = list())
 }
 \value{
 TODO
